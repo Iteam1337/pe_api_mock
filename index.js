@@ -102,14 +102,19 @@ const createPayslip = (i) => {
       end: moment().subtract(i - 1, 'months').format()
     },
     paymentDate: moment().subtract(i - 1, 'months').format(),
-    expenseJournals: [
+    expenses: [
       { 
-        description: 'Expense',
+        description: 'Expense 1',
         amount: 500,
-        entries: Array.from({ length: 15 }).map((_, i) => createExpense(i)) 
+        entries: Array.from({ length: 10 }).map((_, i) => createExpense(i)) 
+      },
+      { 
+        description: 'Expense 2',
+        amount: 250,
+        entries: Array.from({ length: 6 }).map((_, i) => createExpense(i)) 
       },
     ],
-    entries: [
+    articles: [
       {
         activityType: 'Sick',
         activityName: 'Sjuk',
@@ -124,10 +129,21 @@ const createPayslip = (i) => {
   }
 }
 
-mobileApp.get('/mobile-api/ws/payroll/payslip', async (req, res) => {
-  const { length } = req.query
+mobileApp.get('/mobile-api/ws/payroll/payout', async (req, res) => {
   await wait(1500)
-  console.log('get.payslips', length)
-  const payslips = Array.from({ length: length ? length : 10 }).map((_, i) => createPayslip(i)).reverse()
-  res.send(payslips)
+  console.log('get.payslips')
+  const length = req.query.length ? req.query.length : 10
+  const payslips = Array.from({ length }).map((_, i) => createPayslip(i)).reverse()
+  console.log({
+    offset: 0,
+    limit: 0,
+    count: length,
+    data: payslips
+  })
+  res.send({
+    offset: 0,
+    limit: 0,
+    count: length,
+    data: payslips
+  })
 })
