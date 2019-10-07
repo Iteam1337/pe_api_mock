@@ -2,6 +2,7 @@ const bodyParser = require('body-parser')
 const app = require('express')()
 const mobileApp = require('express')()
 const moment = require('moment')
+const expenseFileBinaryHex = require('./expenseFileBinaryHex.js')
 
 const wait = (time) => new Promise(resolve => setTimeout(() => resolve(), time))
 
@@ -159,4 +160,12 @@ mobileApp.get('/mobile-api/ws/expense/entryCounts', async (req, res) => {
     openCardTransactions: 1,
     unprocessedExpenseFiles: 13
   })
+})
+
+mobileApp.get('/mobile-api/ws/expense/unprocessedExpenseFiles', async (req, res) => {
+  await wait(2500)
+  res.send([
+    { registrationDate: new Date().toISOString(), amount: 111, thumbnail: expenseFileBinaryHex.peLogo},
+    { registrationDate: new Date().toISOString(), amount: 222, thumbnail: expenseFileBinaryHex.peLogo}
+  ])
 })
