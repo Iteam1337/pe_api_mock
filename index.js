@@ -152,3 +152,11 @@ mobileApp.get('/mobile-api/ws/payroll/payout', async (req, res) => {
     data: payouts
   })
 })
+
+mobileApp.get('/mobile-api/ws/expense/entryCounts', async (req, res) => {
+  res.send({
+    sortedExpenseEntries: 3,
+    openCardTransactions: 1,
+    unprocessedExpenseFiles: 13
+  })
+})
