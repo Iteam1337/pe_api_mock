@@ -59,22 +59,64 @@ mobileApp.post('/mobile-api/ws/user/login', (req, res) => {
     {
       id: 2,
       name: "PE Accounting",
-      token: 'another-token',
-      main: true,
+      token: 'another-token2',
+      main: false,
       active: true,
     },
     {
       id: 3,
-      name: "Taxi Stockholm",
-      token: 'another-token',
-      main: true,
+      name: "Sebastians Sajter",
+      token: 'another-token3',
+      main: false,
       active: true,
     },
     {
       id: 4,
-      name: "Mattias gräv AB",
-      token: 'another-token',
-      main: true,
+      name: "Andreas Ananasjuice",
+      token: 'another-token4',
+      main: false,
+      active: true,
+    },
+    {
+      id: 5,
+      name: "Jonnas Jiu-jitsuklubb",
+      token: 'another-token5',
+      main: false,
+      active: true,
+    },
+    {
+      id: 6,
+      name: "Viktors VVS",
+      token: 'another-token6',
+      main: false,
+      active: true,
+    },
+    {
+      id: 7,
+      name: "Toms Tombolas",
+      token: 'another-token7',
+      main: false,
+      active: true,
+    },
+    {
+      id: 8,
+      name: "Emils Emaljögon",
+      token: 'another-token8',
+      main: false,
+      active: true,
+    },
+    {
+      id: 9,
+      name: "Albins Arbetarfik",
+      token: 'another-token9',
+      main: false,
+      active: true,
+    },
+    {
+      id: 10,
+      name: "Jennys Jeansfärgade Jackor",
+      token: 'another-token10',
+      main: false,
       active: true,
     }
   ])
@@ -104,12 +146,12 @@ const createPayslip = (i) => {
     paymentDate: moment().subtract(i - 1, 'months').format(),
     expenses: [
       {
-        description: 'Expense 1',
+        description: 'Kvartalskalas',
         amount: 500,
         entries: Array.from({ length: 10 }).map((_, i) => createExpense(i))
       },
       {
-        description: 'Expense 2',
+        description: 'Kickoff',
         amount: 250,
         entries: Array.from({ length: 6 }).map((_, i) => createExpense(i))
       },
@@ -123,7 +165,17 @@ const createPayslip = (i) => {
           end: moment().format()
         },
         price: 1500,
-        quantity: 8.1
+        quantity: 8.2
+      },
+      {
+        activityType: 'VacationPaid',
+        activityName: 'Semester',
+        period: {
+          start: moment().format(),
+          end: moment().format()
+        },
+        price: 15000,
+        quantity: 5.1
       }
     ]
   }
@@ -150,5 +202,13 @@ mobileApp.get('/mobile-api/ws/payroll/payout', async (req, res) => {
     limit,
     count: allPayouts.length,
     data: payouts
+  })
+})
+
+mobileApp.get('/mobile-api/ws/expense/entryCounts', async (req, res) => {
+  res.send({
+    sortedExpenseEntries: 5,
+    openCardTransactions: 12,
+    unprocessedExpenseFiles: 8
   })
 })
