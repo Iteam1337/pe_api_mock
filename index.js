@@ -2,7 +2,7 @@ const bodyParser = require('body-parser')
 const app = require('express')()
 const mobileApp = require('express')()
 const moment = require('moment')
-const expenseFileBinaryHex = require('./expenseFileBinaryHex.js')
+const fs = require('fs')
 
 const wait = (time) => new Promise(resolve => setTimeout(() => resolve(), time))
 
@@ -60,19 +60,12 @@ mobileApp.post('/mobile-api/ws/user/login', (req, res) => {
     {
       id: 2,
       name: "PE Accounting",
-      token: 'another-token',
+      token: 'a-token',
       main: true,
       active: true,
     },
     {
       id: 3,
-      name: "Taxi Stockholm",
-      token: 'another-token',
-      main: true,
-      active: true,
-    },
-    {
-      id: 4,
       name: "Mattias gräv AB",
       token: 'another-token',
       main: true,
@@ -87,8 +80,8 @@ const createExpense = (i) => ({
   totalAmount: 500 + 250 * i
 })
 
-const createPayslip = (i) => {
-  const grossAmount = Math.round(120000000 + Math.floor(Math.random() * 1000000))
+const createPayslip = (i, generous = false) => {
+  const grossAmount = generous ? Math.round(6500000 + i * 1000) : Math.round(20000 + i * 1000)
   const taxAmount = Math.round(grossAmount * 0.25)
   const payoutAmount = grossAmount - taxAmount
   return {
@@ -130,42 +123,55 @@ const createPayslip = (i) => {
   }
 }
 
-const allPayouts = Array.from({ length: 100 }).map((_, i) => createPayslip(i)).reverse()
+const generousPayouts = Array.from({ length: 20 }).map((_, i) => createPayslip(i, true)).reverse()
+const cheapPayouts = Array.from({ length: 20 }).map((_, i) => createPayslip(i)).reverse()
 
 mobileApp.get('/mobile-api/ws/payroll/payout', async (req, res) => {
-  await wait(2500)
-  console.log('get.payslips')
+  await wait(2000);
+  console.log(req.query.token);
+  const generous = req.query.token === 'a-token'
+
   const limit = req.query.limit ? Number(req.query.limit) : 10
   const offset = req.query.offset ? Number(req.query.offset) : 0
 
-  const payouts = allPayouts.slice(offset, offset + limit);
+  const payouts = (generous ? generousPayouts : cheapPayouts).slice(offset, offset + limit);
 
-  console.log({
-    offset,
-    limit,
-    count: allPayouts.length,
-    data: payouts.length
-  })
   res.send({
     offset,
     limit,
-    count: allPayouts.length,
+    count: generousPayouts.length,
     data: payouts
   })
 })
 
 mobileApp.get('/mobile-api/ws/expense/entryCounts', async (req, res) => {
+  await wait(2000);
   res.send({
-    sortedExpenseEntries: 3,
-    openCardTransactions: 1,
-    unprocessedExpenseFiles: 13
+    sortedExpenseEntries: 0,
+    openCardTransactions: 0,
+    unprocessedExpenseFiles: 0
   })
 })
 
-mobileApp.get('/mobile-api/ws/expense/unprocessedExpenseFiles', async (req, res) => {
-  await wait(2500)
-  res.send([
-    { registrationDate: new Date().toISOString(), amount: 111, thumbnail: expenseFileBinaryHex.peLogo},
-    { registrationDate: new Date().toISOString(), amount: 222, thumbnail: expenseFileBinaryHex.peLogo}
-  ])
+let buff = fs.readFileSync('kvitto.jpg');
+let base64data = buff.toString('base64');
+
+const unprocessedExpenseFiles = Array.from({ length: 30 }).map((_, i) => ({
+  id: i, registrationDate: new Date().toISOString(), amount: 333, b64Thumbnail: base64data
+})).reverse()
+
+mobileApp.get('/mobile-api/ws/expense/unprocessedFiles', async (req, res) => {
+  console.log('unprocessedfiles');
+  await wait(2000);
+  const limit = req.query.limit ? Number(req.query.limit) : 10
+  const offset = req.query.offset ? Number(req.query.offset) : 0
+
+  const files = unprocessedExpenseFiles.slice(offset, offset + limit);
+
+  res.send({
+    offset,
+    limit,
+    count: unprocessedExpenseFiles.length,
+    data: files
+  });
 })
