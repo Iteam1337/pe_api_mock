@@ -2,14 +2,14 @@ const bodyParser = require('body-parser')
 const app = require('express')()
 const mobileApp = require('express')()
 const moment = require('moment')
-const expenseFileBinaryHex = require('./expenseFileBinaryHex.js')
 const { companies } = require('./Data')
 const fs = require('fs')
 
 const wait = (time) => new Promise(resolve => setTimeout(() => resolve(), time))
 
 app.listen(18085)
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '50mb', extended: true}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.get('/', (req, res) => res.json({ hey: 'ho' }))
 app.post('/accounting-test/ws/company/create', (req, res) => {
@@ -38,7 +38,8 @@ app.get('/accounting-test/ws/ping', (req, res) => {
 })
 
 mobileApp.listen(18084)
-mobileApp.use(bodyParser.json())
+mobileApp.use(bodyParser.json({limit: '50mb', extended: true}));
+mobileApp.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 mobileApp.get('/', (req, res) => res.send({ hello: 'world' }))
 mobileApp.post('/mobile-api/ws/user/login', (req, res) => {
@@ -146,13 +147,14 @@ mobileApp.get('/mobile-api/ws/expense/entryCounts', async (req, res) => {
 let buff = fs.readFileSync('kvitto.jpg');
 let base64data = buff.toString('base64');
 
-const unprocessedExpenseFiles = Array.from({ length: 30 }).map((_, i) => ({
-  id: i, registrationDate: new Date().toISOString(), amount: 333, b64Thumbnail: base64data
+const createFiles = (length = 5, thumbnail = base64data) => Array.from({ length }).map((_, i) => ({
+  id: i, registrationDate: moment().subtract(i, 'days').toISOString(), amount: 333, b64Thumbnail: thumbnail
 })).reverse()
 
+let unprocessedExpenseFiles = []
+
 mobileApp.get('/mobile-api/ws/expense/unprocessedFiles', async (req, res) => {
-  console.log('unprocessedfiles');
-  await wait(2000);
+  console.log('unprocessedfiles')
   const limit = req.query.limit ? Number(req.query.limit) : 10
   const offset = req.query.offset ? Number(req.query.offset) : 0
 
@@ -162,8 +164,22 @@ mobileApp.get('/mobile-api/ws/expense/unprocessedFiles', async (req, res) => {
     offset,
     limit,
     count: unprocessedExpenseFiles.length,
-    data: files
+    data: [
+      ...createFiles(1, base64data),
+      ...files,
+    ]
   });
+})
+
+mobileApp.post('/mobile-api/ws/expense/createFile', async (req, res) => {
+  
+  const newFiles = createFiles(1, req.body.data.toString('base64'))
+  unprocessedExpenseFiles = [
+    ...unprocessedExpenseFiles,
+    ...newFiles
+  ]
+  res.status(200)
+  res.send(newFiles[0])
 })
 
 let bankIdProgressCompleted
