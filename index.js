@@ -93,22 +93,26 @@ const createPayslip = (i, generous = false) => {
       {
         activityType: 'Sick',
         activityName: 'Sjuk',
+        activityDescription: 'sick-activity-description',
         period: {
           start: moment().format(),
           end: moment().format()
         },
         price: 1500,
-        quantity: 8.2
+        quantity: 8.2,
+        unit: 't'
       },
       {
         activityType: 'VacationPaid',
         activityName: 'Semester',
+        activityDescription: 'vacation-paid-activity-description',
         period: {
           start: moment().format(),
           end: moment().format()
         },
         price: 15000,
-        quantity: 5.1
+        quantity: 5.1,
+        unit: 't'
       }
     ]
   }
