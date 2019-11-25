@@ -175,8 +175,28 @@ mobileApp.get('/mobile-api/ws/expense/unprocessedFiles', async (req, res) => {
   });
 })
 
+mobileApp.get('/mobile-api/ws/expense/file/:fileId', async (req, res) => {
+  res.send({
+    ...unprocessedExpenseFiles[0],
+    b64Thumbnail: null,
+    b64Image: unprocessedExpenseFiles[0].b64Thumbnail,
+  })
+})
+
+mobileApp.get('/mobile-api/ws/expense/entryForm/:fileId/defaults', (req, res) => {
+  res.send({
+    "companyCard": null,
+    "date": "2015-11-01",
+    "expenseType": null,
+    "description": "",
+    "digital": false,
+    "currencyType": "SEK",
+    "countryCode": "SE",
+    "dimensionsDistributions": []
+  })
+})
+
 mobileApp.post('/mobile-api/ws/expense/createFile', async (req, res) => {
-  
   const newFiles = createFiles(1, req.body.data.toString('base64'))
   unprocessedExpenseFiles = [
     ...unprocessedExpenseFiles,
